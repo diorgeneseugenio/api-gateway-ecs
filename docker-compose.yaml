@@ -1,0 +1,9 @@
+services:
+  service-a:
+    build: ./service-a
+    ports:
+      - "3002:3000"
+  service-b:
+    build: ./service-b
+    ports:
+      - "3003:3000"
