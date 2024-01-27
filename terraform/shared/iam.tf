@@ -41,3 +41,91 @@ resource "aws_security_group" "ecs_node_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# --- ECS Task Role ---
+
+data "aws_iam_policy_document" "ecs_task_doc" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_service_a_task_role" {
+  name_prefix        = "demo-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
+}
+
+resource "aws_iam_role" "ecs_service_a_exec_role" {
+  name_prefix        = "demo-ecs-exec-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
+}
+
+resource "aws_iam_role_policy" "ecs_task_execution_service_a_policy" {
+  name = "ecs-task-execution-policy-service-a"
+  role = aws_iam_role.ecs_service_a_exec_role.id
+  policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect = "Allow"
+            Action = [
+              "ecr:GetAuthorizationToken",
+              "ecr:BatchCheckLayerAvailability",
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ]
+            Resource = "*"
+          }
+        ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_service_a_exec_role_policy" {
+  role       = aws_iam_role.ecs_service_a_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role" "ecs_service_b_task_role" {
+  name_prefix        = "demo-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
+}
+
+resource "aws_iam_role" "ecs_service_b_exec_role" {
+  name_prefix        = "demo-ecs-exec-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
+}
+
+resource "aws_iam_role_policy" "ecs_task_execution_service_b_policy" {
+  name = "ecs-task-execution-policy-service-b"
+  role = aws_iam_role.ecs_service_b_exec_role.id
+  policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect = "Allow"
+            Action = [
+              "ecr:GetAuthorizationToken",
+              "ecr:BatchCheckLayerAvailability",
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ]
+            Resource = "*"
+          }
+        ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_service_b_exec_role_policy" {
+  role       = aws_iam_role.ecs_service_b_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}

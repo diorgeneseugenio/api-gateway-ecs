@@ -20,12 +20,15 @@ resource "aws_subnet" "public" {
   availability_zone       = local.azs_names[count.index]
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 10 + count.index)
   map_public_ip_on_launch = true
+  
   tags                    = { Name = "public-${local.azs_names[count.index]}" }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "igw" }
+
+  depends_on = [aws_vpc.main]
 
   timeouts {
     delete = "2m"
@@ -43,6 +46,8 @@ resource "aws_eip" "main" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "rt-public" }
+
+  depends_on = [aws_vpc.main]
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -64,42 +69,3 @@ resource "aws_nat_gateway" "public" {
   subnet_id     = aws_subnet.public[count.index].id
 }
 
-
-### PRIVATE CONFIGURATION
-resource "aws_subnet" "private" {
-  count             = local.azs_count
-  vpc_id            = aws_vpc.main.id
-  availability_zone = local.azs_names[count.index]
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, 16 + count.index)
-  tags              = { Name = "private-${local.azs_names[count.index]}" }
-}
-
-resource "aws_ec2_transit_gateway" "transit_gateway" {}
-
-resource "aws_ec2_transit_gateway_vpc_attachment" "gateway_attachement" {
-  subnet_ids = aws_subnet.private[*].id
-
-  vpc_id             = aws_vpc.main.id
-  transit_gateway_id = aws_ec2_transit_gateway.transit_gateway.id
-}
-
-resource "aws_route_table" "private" {
-  count = local.azs_count
-
-  vpc_id = aws_vpc.main.id
-}
-
-resource "aws_route" "private" {
-  count = local.azs_count
-
-  route_table_id = aws_route_table.private[count.index].id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.public[count.index].id
-}
-
-resource "aws_route_table_association" "private" {
-  count = local.azs_count
-
-  route_table_id = aws_route_table.private[count.index].id
-  subnet_id      = aws_subnet.private[count.index].id
-}
