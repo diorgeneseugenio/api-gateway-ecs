@@ -56,76 +56,39 @@ data "aws_iam_policy_document" "ecs_task_doc" {
   }
 }
 
-resource "aws_iam_role" "ecs_service_a_task_role" {
+resource "aws_iam_role" "ecs_task_role" {
   name_prefix        = "demo-ecs-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
 }
 
-resource "aws_iam_role" "ecs_service_a_exec_role" {
+resource "aws_iam_role" "ecs_exec_role" {
   name_prefix        = "demo-ecs-exec-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
 }
 
-resource "aws_iam_role_policy" "ecs_task_execution_service_a_policy" {
+resource "aws_iam_role_policy" "ecs_task_execution_policy" {
   name = "ecs-task-execution-policy-service-a"
-  role = aws_iam_role.ecs_service_a_exec_role.id
+  role = aws_iam_role.ecs_exec_role.id
   policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-          {
-            Effect = "Allow"
-            Action = [
-              "ecr:GetAuthorizationToken",
-              "ecr:BatchCheckLayerAvailability",
-              "ecr:GetDownloadUrlForLayer",
-              "ecr:BatchGetImage",
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-            ]
-            Resource = "*"
-          }
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
         ]
+        Resource = "*"
+      }
+    ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_service_a_exec_role_policy" {
-  role       = aws_iam_role.ecs_service_a_exec_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_iam_role" "ecs_service_b_task_role" {
-  name_prefix        = "demo-ecs-task-role"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
-}
-
-resource "aws_iam_role" "ecs_service_b_exec_role" {
-  name_prefix        = "demo-ecs-exec-role"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_doc.json
-}
-
-resource "aws_iam_role_policy" "ecs_task_execution_service_b_policy" {
-  name = "ecs-task-execution-policy-service-b"
-  role = aws_iam_role.ecs_service_b_exec_role.id
-  policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-          {
-            Effect = "Allow"
-            Action = [
-              "ecr:GetAuthorizationToken",
-              "ecr:BatchCheckLayerAvailability",
-              "ecr:GetDownloadUrlForLayer",
-              "ecr:BatchGetImage",
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-            ]
-            Resource = "*"
-          }
-        ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_service_b_exec_role_policy" {
-  role       = aws_iam_role.ecs_service_b_exec_role.name
+resource "aws_iam_role_policy_attachment" "ecs_exec_role_policy" {
+  role       = aws_iam_role.ecs_exec_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
