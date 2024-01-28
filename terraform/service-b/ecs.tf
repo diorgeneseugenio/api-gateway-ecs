@@ -36,8 +36,8 @@ resource "aws_ecs_service" "service-b" {
   desired_count   = 1
 
   network_configuration {
-    security_groups  = [var.security_group_id]
-    subnets          = var.subnets_id
+    security_groups  = [aws_security_group.service_b_lb.id]
+    subnets          = var.private_subnets_id
     assign_public_ip = true
   }
 
@@ -45,10 +45,8 @@ resource "aws_ecs_service" "service-b" {
     ignore_changes = [desired_count]
   }
 
-  depends_on = [aws_lb_target_group.service-b]
-
   load_balancer {
-    target_group_arn = aws_lb_target_group.service-b.arn
+    target_group_arn = aws_lb_target_group.service_b.arn
     container_name   = "service-b"
     container_port   = 3002
   }

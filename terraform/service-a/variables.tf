@@ -20,12 +20,6 @@ variable "ecs_cluster_id" {
 
 }
 
-variable "security_group_id" {
-  type        = string
-  description = "value of the security_group_id output from the security-group module"
-
-}
-
 variable "subnets_id" {
   type        = list(string)
   description = "value of the subnets_id output from the vpc module"
@@ -36,7 +30,12 @@ variable "vpc_id" {
   description = "value of the vpc_id output from the vpc module"
 }
 
-variable "lb_id" {
+variable "api_gateway_api_id" {
   type        = string
-  description = "value of the lb_id output from the alb module"
+  description = "value of the api_gateway_api_id output from the api-gateway module"
+}
+
+variable "private_subnets_id" {
+  type        = list(string)
+  description = "value of the subnets_id output from the vpc module"
 }

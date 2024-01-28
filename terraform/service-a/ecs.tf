@@ -7,7 +7,6 @@ resource "aws_ecs_task_definition" "service-a" {
   cpu                      = "256"
   memory                   = "512"
 
-
   container_definitions = jsonencode([{
     name         = "service-a",
     image        = "${aws_ecr_repository.service_a.repository_url}:latest",
@@ -37,8 +36,8 @@ resource "aws_ecs_service" "service-a" {
   desired_count   = 1
 
   network_configuration {
-    security_groups  = [var.security_group_id]
-    subnets          = var.subnets_id
+    security_groups  = [aws_security_group.service_a_lb.id]
+    subnets          = var.private_subnets_id
     assign_public_ip = true
   }
 
@@ -47,7 +46,7 @@ resource "aws_ecs_service" "service-a" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.service-a.arn
+    target_group_arn = aws_lb_target_group.service_a.arn
     container_name   = "service-a"
     container_port   = 3001
   }

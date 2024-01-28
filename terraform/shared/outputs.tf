@@ -16,17 +16,19 @@ output "ecs_cluster_id" {
   value = aws_ecs_cluster.main.id
 }
 
-output "security_group_id" {
-  value = aws_security_group.ecs_task.id
-}
-
 output "subnets_id" {
   value = aws_subnet.public[*].id
 }
 
 output "vpc_id" {
-  value = aws_vpc.main.id
+  value = aws_vpc.default.id
 }
-output "lb_id" {
-  value = aws_lb.main.id
+
+output "api_gateway_api_id" {
+  value = aws_apigatewayv2_api.api.id
+}
+
+output "private_subnets_id" {
+  value = aws_subnet.private[*].id
+
 }
