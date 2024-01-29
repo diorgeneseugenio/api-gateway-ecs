@@ -36,9 +36,8 @@ resource "aws_ecs_service" "service-a" {
   desired_count   = 1
 
   network_configuration {
-    security_groups  = [aws_security_group.service_a_lb.id]
+    security_groups  = [aws_security_group.service_a.id]
     subnets          = var.private_subnets_id
-    assign_public_ip = true
   }
 
   lifecycle {

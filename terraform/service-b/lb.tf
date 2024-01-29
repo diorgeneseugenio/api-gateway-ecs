@@ -17,9 +17,28 @@ resource "aws_security_group" "service_b_lb" {
   }
 }
 
+resource "aws_security_group" "service_b" {
+  name   = "service-b-sg"
+  vpc_id = var.vpc_id
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 3002
+    to_port     = 3002
+    security_groups = [aws_security_group.service_b_lb.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_lb" "service_b" {
   name            = "service-b-lb"
-  subnets         = [var.subnets_id[2], var.subnets_id[3]]
+  subnets         = var.subnets_id
   security_groups = [aws_security_group.service_b_lb.id]
 }
 
